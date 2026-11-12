@@ -31,9 +31,17 @@ uv run pytest -q
 
 ## Деплой Render (free tier)
 
-- Web Service **free** — сервис засыпает после простоя, первый запрос медленный.
-- PostgreSQL **free** — лимит ~1 GB; политика неактивности 90 дней.
-- Аватары хранятся в Postgres (bytea), **без** Persistent Disk.
+Как у [rct_final](https://github.com/IgorKheidorov/rct_final): подключить GitHub и Blueprint.
+
+1. [Render Dashboard](https://dashboard.render.com) → **New** → **Blueprint**
+2. Подключить репозиторий **https://github.com/IgorCoherent/schedule-bobr** (ветка `main`)
+3. Применить `render.yaml` (web `schedule-bobr` + Postgres `schedule-bobr-db`)
+4. Дождаться деплоя; проверить `/health` → `{"status":"ok"}`
+5. Вход: `tamara` / `Tamara2025!` (см. `INITIAL_CREDENTIALS.md` локально, не в git)
+
+- Web Service **free** — засыпает после простоя.
+- PostgreSQL **free** — аватары в БД (bytea), без Persistent Disk.
+- `SEED_ON_START=true` создаёт учётки при первом старте.
 
 См. `render.yaml` и `scripts/start.sh`.
 
