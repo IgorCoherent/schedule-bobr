@@ -61,6 +61,9 @@ def run_seed() -> None:
 
 def main() -> None:
     run_seed()
+    from app.seed.shifts_seed import run_shifts_seed
+
+    run_shifts_seed()
 
 
 if __name__ == "__main__":
