@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Чат пожеланий{% endblock %}
+{% block content %}
+<div id="chat-feed" class="chat-feed">
+  {% for m in messages %}
+  <article class="chat-message card">
+    <header class="chat-meta"><strong>{{ m.author.display_name }}</strong> · {{ m.created_at.strftime('%d.%m %H:%M') }}</header>
+    <p>{{ m.text }}</p>
+  </article>
+  {% endfor %}
+</div>
+<form method="post" action="/chat/messages" class="chat-compose">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label class="sr-only" for="chat-text">Сообщение</label>
+  <textarea id="chat-text" name="text" rows="2" maxlength="2000" placeholder="Пожелание или замечание…" required></textarea>
+  <button type="submit" class="btn btn-primary">Отправить</button>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+setInterval(function() {
+  if (document.hidden) return;
+  fetch('/chat/messages?limit=50', {credentials: 'same-origin'})
+    .then(r => r.json())
+    .then(function(msgs) {
+      var el = document.getElementById('chat-feed');
+      if (!el) return;
+      el.innerHTML = msgs.map(function(m) {
+        return '<article class="chat-message card"><header class="chat-meta"><strong>'
+          + m.author_name + '</strong></header><p>' + m.text.replace(/</g,'&lt;') + '</p></article>';
+      }).join('');
+    });
+}, 15000);
+</script>
+{% endblock %}

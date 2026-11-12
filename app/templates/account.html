@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<section class="card account-section">
+  <h2>Моё фото</h2>
+  {% if participant %}
+  <div class="avatar-preview">
+    {% if participant.avatar_webp %}
+    <img src="/avatars/{{ participant.id }}" alt="Ваше фото" width="96" height="96" class="avatar-lg">
+    {% else %}
+    <div class="avatar avatar-lg avatar-placeholder">{{ participant.display_name[:2] }}</div>
+    {% endif %}
+  </div>
+  <form method="post" action="/account/avatar" enctype="multipart/form-data" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="btn btn-secondary btn-block">
+      Выбрать фото
+      <input type="file" name="photo" accept="image/*" capture="user" hidden>
+    </label>
+  </form>
+  {% if participant.avatar_webp %}
+  <form method="post" action="/account/avatar/delete" onsubmit="event.preventDefault(); fetch('/account/avatar',{method:'DELETE',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'csrf_token={{ csrf_token }}'}).then(()=>location.reload());">
+    <button type="submit" class="btn btn-danger btn-block">Удалить фото</button>
+  </form>
+  {% endif %}
+  {% else %}
+  <p class="empty-state">Нет привязанного участника.</p>
+  {% endif %}
+</section>
+
+<section class="card account-section">
+  <h2>Смена пароля</h2>
+  <form method="post" action="/account/password" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field"><span>Текущий пароль</span>
+      <input type="password" name="current_password" required>
+      {% if errors.current_password %}<span class="field-error">{{ errors.current_password }}</span>{% endif %}
+    </label>
+    <label class="field"><span>Новый пароль</span>
+      <input type="password" name="new_password" required minlength="8">
+      {% if errors.new_password %}<span class="field-error">{{ errors.new_password }}</span>{% endif %}
+    </label>
+    <label class="field"><span>Подтверждение</span>
+      <input type="password" name="new_password_confirm" required>
+      {% if errors.new_password_confirm %}<span class="field-error">{{ errors.new_password_confirm }}</span>{% endif %}
+    </label>
+    <button type="submit" class="btn btn-primary btn-block">Сохранить пароль</button>
+  </form>
+</section>
+<form method="post" action="/auth/logout" class="logout-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <button type="submit" class="btn btn-secondary btn-block">Выйти</button>
+</form>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{% if participant %}Редактирование{% else %}Новый участник{% endif %}{% endblock %}
+{% set show_nav = false %}
+{% block content %}
+<form method="post" class="card stack" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label class="field"><span>Имя</span><input name="display_name" value="{{ participant.display_name if participant else '' }}" required></label>
+  {% if not participant %}
+  <label class="field"><span>Логин</span><input name="username" required>{% if errors.username %}<span class="field-error">{{ errors.username }}</span>{% endif %}</label>
+  <label class="field"><span>Начальный пароль</span><input name="initial_password" type="password" minlength="8"></label>
+  {% endif %}
+  <label class="field"><span>Роль</span>
+    <select name="role">
+      <option value="cashier" {% if participant and participant.role.value=='cashier' %}selected{% endif %}>Кассир</option>
+      <option value="tech" {% if participant and participant.role.value=='tech' %}selected{% endif %}>Техничка</option>
+    </select>
+  </label>
+  <label class="checkbox"><input type="checkbox" name="special_cashier_quota" {% if participant and participant.special_cashier_quota %}checked{% endif %}> Особая квота (Лена)</label>
+  {% if participant %}
+  <label class="checkbox"><input type="checkbox" name="active" {% if participant.active %}checked{% endif %}> Активен</label>
+  {% if participant.avatar_webp %}
+  <img src="/avatars/{{ participant.id }}" width="96" height="96" class="avatar-lg" alt="">
+  {% endif %}
+  <label class="field">Загрузить фото<input type="file" name="photo" accept="image/*"></label>
+  {% endif %}
+  <button type="submit" class="btn btn-primary btn-block">Сохранить</button>
+</form>
+{% if participant %}
+<form method="post" action="/admin/participants/{{ participant.id }}/avatar" enctype="multipart/form-data" class="stack">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <input type="file" name="photo" accept="image/*">
+  <button type="submit" class="btn btn-secondary">Загрузить аватар</button>
+</form>
+{% endif %}
+{% endblock %}

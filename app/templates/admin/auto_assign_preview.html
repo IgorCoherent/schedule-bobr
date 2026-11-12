@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Предпросмотр назначения{% endblock %}
+{% set show_nav = false %}
+{% block content %}
+<h2>Результат предпросмотра</h2>
+<ul class="stack">
+{% for a in result.assignments %}
+<li class="card">{{ a.duty_date }} — {% if a.participant_id %}#{{ a.participant_id }}{% else %}{{ a.reason }}{% endif %}</li>
+{% endfor %}
+</ul>
+<form method="post" action="/admin/auto-assign/commit">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <input type="hidden" name="preview_id" value="{{ preview_id }}">
+  <button type="submit" class="btn btn-primary btn-block">Подтвердить</button>
+</form>
+{% endblock %}

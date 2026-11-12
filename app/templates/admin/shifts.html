@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Смены{% endblock %}
+{% set show_nav = false %}
+{% block content %}
+<section id="auto" class="card stack">
+  <h2>Авто-назначение</h2>
+  <form method="post" action="/admin/auto-assign/preview" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field">Роль<select name="role"><option value="cashier">Кассир</option><option value="tech">Техничка</option></select></label>
+    <label class="field">С <input type="date" name="start_date" required></label>
+    <label class="field">По <input type="date" name="end_date" required></label>
+    <button type="submit" class="btn btn-primary">Предпросмотр</button>
+  </form>
+</section>
+
+<section class="card stack">
+  <h2>Новая смена</h2>
+  <form method="post" action="/admin/shifts" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field">Участник
+      <select name="participant_id">
+        {% for p in participants %}<option value="{{ p.id }}">{{ p.display_name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label class="field">Роль<select name="role"><option value="cashier">Кассир</option><option value="tech">Техничка</option></select></label>
+    <label class="field">Дата <input type="date" name="duty_date" required></label>
+    <label class="field">Заметка <input name="note"></label>
+    <button type="submit" class="btn btn-primary">Создать</button>
+  </form>
+</section>
+
+<ul class="shift-list">
+{% for shift in shifts %}
+<li class="card shift-admin-row">
+  {{ shift.duty_date }} — {{ shift.participant.display_name }} ({{ shift.role.value }})
+  <form method="post" action="/admin/shifts/{{ shift.id }}/move" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="date" name="new_date" required>
+    <button type="submit" class="btn btn-secondary">Перенести</button>
+  </form>
+</li>
+{% endfor %}
+</ul>
+{% endblock %}

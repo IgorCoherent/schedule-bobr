@@ -1,0 +1,63 @@
+[
+  {
+    "display_name": "Тамара",
+    "username": "tamara",
+    "user_role": "admin",
+    "initial_password": "Tamara2025!",
+    "participant": null
+  },
+  {
+    "display_name": "Лена",
+    "username": "lena",
+    "user_role": "member",
+    "role": "cashier",
+    "special_cashier_quota": true,
+    "active": true,
+    "initial_password": "Smena2025!"
+  },
+  {
+    "display_name": "Наталья",
+    "username": "natalya",
+    "user_role": "member",
+    "role": "cashier",
+    "special_cashier_quota": false,
+    "active": true,
+    "initial_password": "Smena2025!"
+  },
+  {
+    "display_name": "Ольга",
+    "username": "olga",
+    "user_role": "member",
+    "role": "cashier",
+    "special_cashier_quota": false,
+    "active": true,
+    "initial_password": "Smena2025!"
+  },
+  {
+    "display_name": "Ирина",
+    "username": "irina",
+    "user_role": "member",
+    "role": "cashier",
+    "special_cashier_quota": false,
+    "active": true,
+    "initial_password": "Smena2025!"
+  },
+  {
+    "display_name": "Светлана",
+    "username": "svetlana",
+    "user_role": "member",
+    "role": "tech",
+    "special_cashier_quota": false,
+    "active": true,
+    "initial_password": "Smena2025!"
+  },
+  {
+    "display_name": "Марина",
+    "username": "marina",
+    "user_role": "member",
+    "role": "tech",
+    "special_cashier_quota": false,
+    "active": true,
+    "initial_password": "Smena2025!"
+  }
+]

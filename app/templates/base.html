@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}Дежурства{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script src="/static/vendor/htmx.min.js" defer></script>
+  <script src="/static/vendor/alpine.min.js" defer></script>
+</head>
+<body class="app-body">
+  <header class="app-header">
+    <div class="header-inner">
+      <h1 class="app-title">Дежурства</h1>
+      <p class="app-subtitle">Расписание — кассиры и технички</p>
+      <div class="header-actions">
+        <a href="/account" class="link-profile">Профиль</a>
+        {% if is_admin|default(false) %}
+        <a href="/admin" class="link-admin">Админ</a>
+        {% endif %}
+      </div>
+    </div>
+    {% block header_extra %}{% endblock %}
+  </header>
+
+  <main class="app-main">
+    {% if flash %}
+    <p class="flash" role="status">{{ flash }}</p>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if show_nav|default(true) %}
+  <nav class="bottom-nav" aria-label="Основная навигация">
+    <a href="/schedule" class="nav-item {% if page == 'all' %}active{% endif %}">Все</a>
+    <a href="/schedule/me" class="nav-item {% if page == 'me' %}active{% endif %}">Мои</a>
+    <a href="/chat" class="nav-item {% if page == 'chat' %}active{% endif %}">Чат</a>
+  </nav>
+  {% endif %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход — Дежурства</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="app-body login-page">
+  <main class="app-main login-main">
+  <h1 class="app-title">Дежурства</h1>
+  <p class="app-subtitle">Вход в приложение</p>
+  {% if error %}
+  <p class="form-error" role="alert">{{ error }}</p>
+  {% endif %}
+  <form method="post" action="/auth/login" class="card form-card">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field">
+      <span>Логин</span>
+      <input name="username" autocomplete="username" required>
+    </label>
+    <label class="field">
+      <span>Пароль</span>
+      <input name="password" type="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit" class="btn btn-primary btn-block">Войти</button>
+  </form>
+  </main>
+</body>
+</html>

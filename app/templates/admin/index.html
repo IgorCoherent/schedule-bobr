@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Админ{% endblock %}
+{% set show_nav = false %}
+{% block content %}
+<ul class="admin-menu card stack">
+  <li><a href="/admin/participants">Участники</a></li>
+  <li><a href="/admin/shifts">Смены</a></li>
+  <li><a href="/admin/shifts#auto">Авто-назначение</a></li>
+  <li><a href="/schedule">К расписанию</a></li>
+</ul>
+{% endblock %}

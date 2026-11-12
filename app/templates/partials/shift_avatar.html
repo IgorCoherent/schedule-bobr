@@ -1,0 +1,5 @@
+{% if shift.participant.avatar_webp %}
+<img class="avatar" src="/avatars/{{ shift.participant.id }}" alt="" width="44" height="44">
+{% else %}
+<div class="avatar avatar-placeholder" aria-hidden="true">{{ shift.participant.display_name[:2] }}</div>
+{% endif %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Участники{% endblock %}
+{% set show_nav = false %}
+{% block content %}
+<p><a href="/admin/participants/new" class="btn btn-primary">Новый участник</a></p>
+<ul class="stack">
+{% for p in participants %}
+<li class="card"><a href="/admin/participants/{{ p.id }}/edit">{{ p.display_name }}</a> — {{ p.role.value }}</li>
+{% endfor %}
+</ul>
+<p><a href="/admin">← Админ</a></p>
+{% endblock %}
