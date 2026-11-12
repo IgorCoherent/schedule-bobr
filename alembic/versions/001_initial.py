@@ -19,8 +19,8 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    user_role = sa.Enum("admin", "member", name="user_role")
-    participant_role = sa.Enum("cashier", "tech", name="participant_role")
+    user_role = postgresql.ENUM("admin", "member", name="user_role", create_type=False)
+    participant_role = postgresql.ENUM("cashier", "tech", name="participant_role", create_type=False)
     user_role.create(op.get_bind(), checkfirst=True)
     participant_role.create(op.get_bind(), checkfirst=True)
 
