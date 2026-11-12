@@ -35,9 +35,10 @@ def test_schedule_role_filter(client: TestClient, db_session: Session) -> None:
         "/auth/login",
         data={"username": "m1", "password": "Smena2025!", "csrf_token": csrf},
     )
-    r = client.get("/schedule?role=cashier")
-    assert "Техничка" not in r.text
+    r = client.get("/schedule?month=2025-02&day=2025-02-02&role=cashier")
     assert r.status_code == 200
+    assert 'aria-label="C, Кассир"' in r.text
+    assert 'aria-label="T, Техничка"' not in r.text
 
 
 def test_move_shift_conflict_409(logged_in_admin: TestClient, db_session: Session, admin_user) -> None:

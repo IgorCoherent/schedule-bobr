@@ -51,7 +51,7 @@ def test_schedule_me_only_own_shifts(client: TestClient, db_session: Session) ->
         "/auth/login",
         data={"username": "u1", "password": "Smena2025!", "csrf_token": csrf},
     )
-    r = client.get("/schedule/me")
+    r = client.get("/schedule/me?month=2025-03&day=2025-03-02")
     assert r.status_code == 200
-    assert "U1" in r.text or "03.02.2025" in r.text
+    assert "U1" in r.text
     assert "U2" not in r.text

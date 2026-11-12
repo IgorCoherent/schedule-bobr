@@ -1,0 +1,75 @@
+<div class="calendar-board">
+  <div class="calendar-toolbar">
+    <a class="cal-nav" href="{{ prev_href }}" aria-label="Предыдущий месяц">‹</a>
+    <h2 class="calendar-title">{{ month_title }}</h2>
+    <a class="cal-nav" href="{{ next_href }}" aria-label="Следующий месяц">›</a>
+    <a class="cal-nav cal-today" href="{{ today_href }}">Сегодня</a>
+  </div>
+  <div class="role-filter">
+    {% if show_role_filter %}
+    <a href="{{ href_all }}" class="seg {% if role == 'all' %}active{% endif %}">Все</a>
+    <a href="{{ href_cashier }}" class="seg {% if role == 'cashier' %}active{% endif %}">Кассиры</a>
+    <a href="{{ href_tech }}" class="seg {% if role == 'tech' %}active{% endif %}">Технички</a>
+    {% endif %}
+    <a href="{{ href_month }}" class="seg {% if view == 'month' %}active{% endif %}">Месяц</a>
+    <a href="{{ href_list }}" class="seg {% if view == 'list' %}active{% endif %}">Список</a>
+  </div>
+
+  {% if view == 'list' %}
+    {% if not list_shifts %}
+    <p class="empty-state">В этом месяце нет смен.</p>
+    {% else %}
+    <ul class="shift-list">
+      {% for shift in list_shifts %}
+      <li class="shift-card card">
+        {% include "partials/shift_avatar.html" %}
+        <div class="shift-info">
+          <time class="shift-date">{{ shift.duty_date.strftime('%d.%m.%Y') }}</time>
+          <span class="shift-name">{{ shift.participant.display_name }}</span>
+          <span class="badge badge-{{ shift.role.value }}">{% if shift.role.value == 'cashier' %}Кассир{% else %}Техничка{% endif %}</span>
+          {% if shift.note %}<span class="shift-note">{{ shift.note }}</span>{% endif %}
+        </div>
+        {% if show_admin %}
+        <form method="post" action="/admin/shifts/{{ shift.id }}/move" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="date" name="new_date" required>
+          <button type="submit" class="btn btn-secondary">Перенести</button>
+        </form>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  {% else %}
+    {% if legend %}
+    <details class="legend">
+      <summary>Кто есть кто</summary>
+      <ul class="legend-list">
+        {% for person in legend %}
+        <li><span class="legend-dot chip-{{ person.id % 8 }}"></span>{{ person.display_name }}</li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+    <div class="cal-dow-row">
+      <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span class="cal-dow-sun">Вс</span>
+    </div>
+    <div class="calendar-grid">
+      {% for cell in cells %}
+        {% if not cell.in_month %}
+        <div class="cal-cell is-outside" aria-hidden="true"></div>
+        {% else %}
+        <a class="cal-cell{% if cell.is_selected %} is-selected{% endif %}" href="{{ base_path }}?month={{ month_iso }}&day={{ cell.date.isoformat() }}{% if role != 'all' %}&role={{ role }}{% endif %}{% if view == 'list' %}&view=list{% endif %}">
+          <span class="cal-day{% if cell.is_today %} is-today{% endif %}">{{ cell.date.day }}</span>
+          {% for shift in cell.shifts[:2] %}
+          {% include "partials/shift_chip.html" %}
+          {% endfor %}
+          {% if cell.shifts|length > 2 %}
+          <span class="shift-more">+{{ cell.shifts|length - 2 }}</span>
+          {% endif %}
+        </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

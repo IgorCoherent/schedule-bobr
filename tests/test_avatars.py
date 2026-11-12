@@ -60,7 +60,7 @@ def test_schedule_shows_avatar_img(client: TestClient, db_session: Session, admi
         "/auth/login",
         data={"username": "av2", "password": "Smena2025!", "csrf_token": csrf},
     )
-    r = client.get("/schedule")
+    r = client.get("/schedule?month=2025-04&day=2025-04-06")
     assert f"/avatars/{p.id}" in r.text
 
 

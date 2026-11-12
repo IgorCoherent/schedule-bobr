@@ -1,0 +1,42 @@
+<section class="agenda card">
+  {% if show_day_panel %}
+  <h2 class="agenda-title">{{ selected_label }}</h2>
+  {% if not day_shifts %}
+  <p class="empty-state">В этот день никого нет.</p>
+  {% else %}
+  <ul class="shift-list">
+    {% for shift in day_shifts %}
+    <li class="shift-card card">
+      {% include "partials/shift_avatar.html" %}
+      <div class="shift-info">
+        <span class="shift-name">{{ shift.participant.display_name }}</span>
+        <span class="badge badge-{{ shift.role.value }}">{% if shift.role.value == 'cashier' %}Кассир{% else %}Техничка{% endif %}</span>
+        {% if shift.note %}<span class="shift-note">{{ shift.note }}</span>{% endif %}
+      </div>
+      {% if show_admin %}
+      <form method="post" action="/admin/shifts/{{ shift.id }}/move" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="date" name="new_date" required>
+        <button type="submit" class="btn btn-secondary">Перенести</button>
+      </form>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endif %}
+  {% if show_admin %}
+  <form method="post" action="/admin/shifts" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="duty_date" value="{{ create_iso }}">
+    <label class="field">Участник
+      <select name="participant_id">
+        {% for p in participants %}<option value="{{ p.id }}">{{ p.display_name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label class="field">Роль<select name="role"><option value="cashier">Кассир</option><option value="tech">Техничка</option></select></label>
+    <label class="field">Заметка <input name="note"></label>
+    <button type="submit" class="btn btn-primary">Создать</button>
+  </form>
+  {% endif %}
+</section>

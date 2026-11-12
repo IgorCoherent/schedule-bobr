@@ -4,17 +4,19 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.auth.csrf import generate_csrf_token, validate_csrf_token
 from app.auth.deps import RequireAdmin
 from app.auth.passwords import hash_password
 from app.avatars.process import process_image_to_webp
+from app.calendar_view import month_bounds, month_status, today_minsk
 from app.config import get_settings
 from app.db import get_db
 from app.models import AssignPreview, Participant, ParticipantRole, Shift, User, UserRole
+from app.routers.schedule import assemble_calendar
 from app.scheduler.engine import MIN_GAP_DAYS, compute_assign_preview
 
 router = APIRouter()
@@ -28,12 +30,23 @@ def _templates(request: Request):
 def admin_home(
     request: Request,
     user: RequireAdmin,
+    db: Annotated[Session, Depends(get_db)],
 ):
+    today = today_minsk()
+    start, end = month_bounds(today.year, today.month)
+    count = db.scalar(
+        select(func.count()).select_from(Shift).where(Shift.duty_date >= start, Shift.duty_date < end)
+    )
     templates = _templates(request)
     return templates.TemplateResponse(
         request,
         "admin/index.html",
-        {"user": user, "csrf_token": generate_csrf_token(request), "is_admin": True},
+        {
+            "user": user,
+            "csrf_token": generate_csrf_token(request),
+            "is_admin": True,
+            "month_status": month_status(today, int(count or 0)),
+        },
     )
 
 
@@ -224,6 +237,10 @@ async def shifts_admin(
     user: RequireAdmin,
     db: Annotated[Session, Depends(get_db)],
     shift_id: Annotated[int | None, Query()] = None,
+    month: Annotated[str | None, Query()] = None,
+    day: Annotated[str | None, Query()] = None,
+    role: Annotated[str | None, Query()] = None,
+    view: Annotated[str | None, Query()] = None,
 ):
     templates = _templates(request)
 
@@ -233,19 +250,24 @@ async def shifts_admin(
         sid = int(str(form.get("shift_id", shift_id or 0)))
         shift = db.get(Shift, sid)
         if shift:
+            deleted = shift.duty_date
             db.delete(shift)
             db.commit()
+            return RedirectResponse(
+                url=f"/admin/shifts?month={deleted:%Y-%m}&day={deleted.isoformat()}",
+                status_code=303,
+            )
         return RedirectResponse(url="/admin/shifts", status_code=303)
 
     if request.method == "POST":
         form = await request.form()
         validate_csrf_token(request, str(form.get("csrf_token", "")))
         participant_id = int(str(form.get("participant_id", 0)))
-        role = ParticipantRole(str(form.get("role", "cashier")))
+        shift_role = ParticipantRole(str(form.get("role", "cashier")))
         duty_date = date.fromisoformat(str(form.get("duty_date")))
         note = str(form.get("note", "")).strip() or None
 
-        if role == ParticipantRole.cashier and duty_date.weekday() != 6:
+        if shift_role == ParticipantRole.cashier and duty_date.weekday() != 6:
             raise HTTPException(status_code=422, detail="Кассир только по воскресеньям")
 
         participant = db.get(Participant, participant_id)
@@ -254,7 +276,7 @@ async def shifts_admin(
 
         shift = Shift(
             participant_id=participant_id,
-            role=role,
+            role=shift_role,
             duty_date=duty_date,
             note=note,
             created_by=user.id,
@@ -265,23 +287,35 @@ async def shifts_admin(
         except IntegrityError:
             db.rollback()
             raise HTTPException(status_code=409, detail="Конфликт даты") from None
-        return RedirectResponse(url="/admin/shifts", status_code=303)
+        return RedirectResponse(
+            url=f"/admin/shifts?month={duty_date:%Y-%m}&day={duty_date.isoformat()}",
+            status_code=303,
+        )
 
-    shifts = list(
-        db.scalars(
-            select(Shift).options(joinedload(Shift.participant)).order_by(Shift.duty_date.desc())
-        ).all()
+    assembled = assemble_calendar(
+        db,
+        path="/admin/shifts",
+        month=month,
+        day=day,
+        role=role,
+        view=view,
+        participant_id=None,
+        ignore_role=False,
     )
+    if isinstance(assembled, RedirectResponse):
+        return assembled
     participants = list(db.scalars(select(Participant).where(Participant.active)).all())
     return templates.TemplateResponse(
         request,
         "admin/shifts.html",
         {
             "user": user,
-            "shifts": shifts,
             "participants": participants,
             "csrf_token": generate_csrf_token(request),
             "is_admin": True,
+            "show_role_filter": True,
+            "show_admin": True,
+            **assembled,
         },
     )
 
@@ -335,7 +369,10 @@ async def move_shift(
         db.rollback()
         raise HTTPException(status_code=409, detail="Конфликт даты") from None
 
-    return RedirectResponse(url="/admin/shifts", status_code=303)
+    return RedirectResponse(
+        url=f"/admin/shifts?month={target:%Y-%m}&day={target.isoformat()}",
+        status_code=303,
+    )
 
 
 @router.post("/auto-assign/preview")

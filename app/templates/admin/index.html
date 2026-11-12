@@ -3,9 +3,10 @@
 {% set show_nav = false %}
 {% block content %}
 <h2 class="page-heading">Панель администратора</h2>
+<p class="month-status">{{ month_status }}</p>
 <ul class="admin-menu stack">
   <li><a href="/admin/participants">Участники</a></li>
-  <li><a href="/admin/shifts">Смены и ручное назначение</a></li>
+  <li><a href="/admin/shifts">Смены</a></li>
   <li><a href="/admin/shifts#auto">Авто-назначение</a></li>
   <li><a href="/schedule">К расписанию</a></li>
 </ul>
